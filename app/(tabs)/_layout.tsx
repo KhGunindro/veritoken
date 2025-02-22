@@ -2,7 +2,6 @@ import { createMaterialTopTabNavigator,
     MaterialTopTabNavigationOptions, 
     MaterialTopTabNavigationEventMap } 
 from '@react-navigation/material-top-tabs'
-import { View, Text } from 'react-native'
 import React from 'react'
 import { withLayoutContext } from 'expo-router'
 import { ParamListBase, TabNavigationState } from '@react-navigation/native'
@@ -19,7 +18,8 @@ MaterialTopTabNavigationEventMap
 const Layout = () => {
   return (
     <MaterialTopTabs>
-        <MaterialTopTabs.Screen name='index' options={{title: 'Home'}}/>
+      <MaterialTopTabs.Screen name='index' options={{ title: 'Home', tabBarLabelStyle: { fontWeight: 'bold' } }} />
+      <MaterialTopTabs.Screen name='Scanner' options={{ title: 'Scanner', tabBarLabelStyle: { fontWeight: 'bold' } }} />
     </MaterialTopTabs>
   )
 }
