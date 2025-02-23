@@ -1,38 +1,59 @@
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import React from 'react';
-import { Link } from 'expo-router';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, TextInput } from 'react-native';
+import React, { useState } from 'react';
+import QRCode from 'react-native-qrcode-svg';
 
 const Page = () => {
-  const handleGenerateQR = async () => {
-    // try {
-    //   const response = await fetch('https://your-backend-api.com/generate-qr', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({ data: 'Your data here' }), // Replace with actual data
-    //   });
+const [qrData, setQrData] = useState<string | null>(null);
+const [companyName, setCompanyName] = useState('');
+const [workingDays, setWorkingDays] = useState('');
+const [showForm, setShowForm] = useState(true);
 
-    //   if (!response.ok) {
-    //     throw new Error('Failed to generate QR code');
-    //   }
 
-    //   const result = await response.json();
-    //   Alert.alert('Success', 'QR code generated successfully!');
-    //   console.log(result); // Handle the response data as needed
-    // } catch (error) {
-    //   Alert.alert('Error', 'Failed to generate QR code. Please try again.');
-    //   console.error(error);
-    // }
-    alert("QR code generated successfully!");
+  const handleGenerateQR = () => {
+    if (!companyName || !workingDays) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+    const data = `Company: ${companyName}, Working Days: ${workingDays}`;
+    setQrData(data);
+    setShowForm(false);
+    Alert.alert('Success', 'QR code generated successfully!');
   };
 
   return (
     <View style={{ flex: 1 }}>
       <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+        {showForm && (
+          <>
+            <TextInput
+              placeholder="Company Name"
+              value={companyName}
+              onChangeText={setCompanyName}
+              style={styles.input}
+            />
+            <TextInput
+              placeholder="Working Days"
+              value={workingDays}
+              onChangeText={setWorkingDays}
+              style={styles.input}
+              keyboardType="numeric"
+            />
+          </>
+        )}
         <TouchableOpacity style={styles.button} onPress={handleGenerateQR}>
           <Text style={styles.buttonText}>Generate QR</Text>
         </TouchableOpacity>
+        
+        {qrData && (
+          <View style={styles.qrContainer}>
+            <QRCode
+              value={qrData}
+              size={200}
+              color="black"
+              backgroundColor="white"
+            />
+          </View>
+        )}
       </View>
     </View>
   );
@@ -40,16 +61,32 @@ const Page = () => {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#007AFF', // Matches the navigation bar color
+    backgroundColor: '#007AFF',
     borderWidth: 1,
-    borderColor: '#007AFF', // Border color matches the background
+    borderColor: '#007AFF',
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
+    marginBottom: 20,
   },
   buttonText: {
     color: 'white',
     fontSize: 16,
+  },
+  qrContainer: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: 'white',
+    borderRadius: 10,
+  },
+  input: {
+    height: 40,
+    width: '80%',
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 20,
+    paddingHorizontal: 10,
+    borderRadius: 5,
   },
 });
 
