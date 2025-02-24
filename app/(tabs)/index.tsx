@@ -6,6 +6,7 @@ import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
 
 const Page = () => {
+
   const [qrData, setQrData] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState('');
   const [workingDays, setWorkingDays] = useState('');
@@ -19,6 +20,7 @@ const Page = () => {
     setWorkingDays('');
     setShowForm(true);
   };
+
 
 
   // change the database to a Cybrella's database
