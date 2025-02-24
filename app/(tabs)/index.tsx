@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import QRCode from 'react-native-qrcode-svg';
 
 const Page = () => {
+
 const [qrData, setQrData] = useState<string | null>(null);
 const [companyName, setCompanyName] = useState('');
 const [workingDays, setWorkingDays] = useState('');
