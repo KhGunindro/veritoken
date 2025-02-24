@@ -55,6 +55,7 @@ const Layout = () => {
             headerRight: () => (
               <Pressable
                 onPress={() => setModalVisible(true)}
+                hitSlop={20}
                 style={{ paddingRight: 15 }}
               >
                 <FontAwesome name="question-circle" size={24} color="white" />
