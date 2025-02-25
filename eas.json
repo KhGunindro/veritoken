@@ -17,6 +17,5 @@
   },
   "submit": {
     "production": {}
-  },
-  "icon": "./assets/icon.png"
+  }
 }
