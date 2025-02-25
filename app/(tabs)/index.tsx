@@ -31,10 +31,26 @@ const Page = () => {
     }).start();
   };
 
+
   // Button press animation states for neumorphic buttons
   const [sharePressed, setSharePressed] = useState(false);
   const [deletePressed, setDeletePressed] = useState(false);
   const [newQRPressed, setNewQRPressed] = useState(false);
+  const handleGenerateQR = () => {
+  const [qrData, setQrData] = useState<string | null>(null);
+  const [companyName, setCompanyName] = useState('');
+  const [workingDays, setWorkingDays] = useState('');
+  const [showForm, setShowForm] = useState(true);
+  const qrRef = useRef(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleNewQR = () => {
+    setQrData(null);
+    setCompanyName('');
+    setWorkingDays('');
+    setShowForm(true);
+  };
+
 
   const handleGenerateQR = async () => {
     if (!companyName || !workingDays) {
@@ -53,10 +69,16 @@ const Page = () => {
 
       if (existingCompanies.includes(companyName.toLowerCase())) {
         Alert.alert('Error', `${companyName} is already registered!`);
+        setIsGenerating(false);
         return;
       }
 
-      const data = `Company: ${companyName}, Working Days: ${workingDays}`;
+      // Create JSON data instead of a string
+      const data = JSON.stringify({
+        CompanyName: companyName,
+        WorkingDays: workingDays
+      });
+      
       setQrData(data);
       setShowForm(false);
 

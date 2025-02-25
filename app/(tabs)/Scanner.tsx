@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 const Page = () => {
   const [permission, requestPermission] = useCameraPermissions();
+  const [isScanning, setIsScanning] = useState(false);
   const router = useRouter();
   const [hoverAnim] = useState(new Animated.Value(8));
 
@@ -13,7 +14,7 @@ const Page = () => {
     Animated.timing(hoverAnim, {
       toValue: 0,
       duration: 200,
-      useNativeDriver: false, // Still false because translateX/Y does not support native driver
+      useNativeDriver: false,
     }).start();
   };
 
@@ -26,13 +27,25 @@ const Page = () => {
   };
 
   const handlePress = async () => {
+    if (isScanning) return;
+    setIsScanning(true);
+
     if (permission?.granted) {
-      router.push('/scanner');
+      router.push({
+        pathname: '/scanner',
+        params: { singleScan: 'true' }
+      });
       return;
     }
+
     const permissionResponse = await requestPermission();
     if (permissionResponse.granted) {
-      router.push('/scanner');
+      router.push({
+        pathname: '/scanner',
+        params: { singleScan: 'true' }
+      });
+    } else {
+      setIsScanning(false);
     }
   };
 
@@ -48,9 +61,7 @@ const Page = () => {
         <Text style={styles.subtitle}>Scan QR to verify your token</Text>
       </View>
 
-      {/* Wrapper to position shadow and button together */}
       <View style={styles.buttonWrapper}>
-        {/* Animated shadow behind the button */}
         <Animated.View
           style={[
             styles.shadow,
@@ -60,14 +71,20 @@ const Page = () => {
           ]}
         />
         <Pressable
-          style={
-            styles.button}
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+            isScanning && styles.buttonDisabled,
+          ]}
           onPress={handlePress}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
+          disabled={isScanning}
         >
           <Ionicons name="scan-outline" size={24} color="white" style={styles.buttonIcon} />
-          <Text style={styles.buttonText}>Open Scanner</Text>
+          <Text style={styles.buttonText}>
+            {isScanning ? "Scanning..." : "Open Scanner"}
+          </Text>
         </Pressable>
       </View>
 
@@ -122,11 +139,11 @@ const styles = StyleSheet.create({
   },
   shadow: {
     position: 'absolute',
-    width: 280, // Slightly bigger than the button for better visibility
+    width: 280,
     height: 60,
-    backgroundColor: 'rgb(0, 0, 0)', // Semi-transparent for a real shadow effect
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
     borderRadius: 10,
-    top: 8, 
+    top: 8,
   },
   button: {
     flexDirection: 'row',
@@ -141,7 +158,14 @@ const styles = StyleSheet.create({
     width: 280,
     elevation: 4,
   },
-
+  buttonPressed: {
+    backgroundColor: '#3730A3',
+    transform: [{ scale: 0.98 }],
+  },
+  buttonDisabled: {
+    backgroundColor: '#9CA3AF',
+    borderColor: '#9CA3AF',
+  },
   buttonIcon: {
     marginRight: 8,
   },
