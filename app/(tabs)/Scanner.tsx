@@ -1,7 +1,7 @@
 import { View, Text, Pressable, StyleSheet, StatusBar, Animated } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCameraPermissions } from 'expo-camera';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 const Page = () => {
@@ -9,6 +9,13 @@ const Page = () => {
   const [isScanning, setIsScanning] = useState(false);
   const router = useRouter();
   const [hoverAnim] = useState(new Animated.Value(8));
+
+  // Reset scanning state when screen comes into focus (when returning from scanner)
+  useFocusEffect(
+    React.useCallback(() => {
+      setIsScanning(false);
+    }, [])
+  );
 
   const handlePressIn = () => {
     Animated.timing(hoverAnim, {
@@ -27,7 +34,6 @@ const Page = () => {
   };
 
   const handlePress = async () => {
-    if (isScanning) return;
     setIsScanning(true);
 
     if (permission?.granted) {
