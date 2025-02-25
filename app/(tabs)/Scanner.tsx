@@ -1,20 +1,35 @@
-import { View, Text, Pressable, StyleSheet, Image, StatusBar } from 'react-native'
-import React from 'react'
-import { useCameraPermissions } from 'expo-camera'
+import { View, Text, Pressable, StyleSheet, StatusBar, Animated } from 'react-native';
+import React, { useState } from 'react';
+import { useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 const Page = () => {
   const [permission, requestPermission] = useCameraPermissions();
   const router = useRouter();
+  const [hoverAnim] = useState(new Animated.Value(8));
+
+  const handlePressIn = () => {
+    Animated.timing(hoverAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: false, // Still false because translateX/Y does not support native driver
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.timing(hoverAnim, {
+      toValue: 8,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  };
 
   const handlePress = async () => {
-    // Check if permission is already granted
     if (permission?.granted) {
       router.push('/scanner');
       return;
     }
-    // Request permission if not granted
     const permissionResponse = await requestPermission();
     if (permissionResponse.granted) {
       router.push('/scanner');
@@ -24,32 +39,44 @@ const Page = () => {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-      
+
       <View style={styles.heroContainer}>
         <View style={styles.iconContainer}>
-          <Ionicons name="qr-code" size={80} color="#4F46E5" />
+          <Ionicons name="qr-code" size={80} color="#3575E4" />
         </View>
         <Text style={styles.title}>QR Scanner</Text>
         <Text style={styles.subtitle}>Scan QR to verify your token</Text>
       </View>
-      
-      <Pressable 
-        style={({pressed}) => [
-          styles.button,
-          pressed && styles.buttonPressed
-        ]}
-        onPress={handlePress}
-      >
-        <Ionicons name="scan-outline" size={24} color="white" style={styles.buttonIcon} />
-        <Text style={styles.buttonText}>Open Scanner</Text>
-      </Pressable>
-      
+
+      {/* Wrapper to position shadow and button together */}
+      <View style={styles.buttonWrapper}>
+        {/* Animated shadow behind the button */}
+        <Animated.View
+          style={[
+            styles.shadow,
+            {
+              transform: [{ translateX: hoverAnim }, { translateY: hoverAnim }],
+            },
+          ]}
+        />
+        <Pressable
+          style={
+            styles.button}
+          onPress={handlePress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+        >
+          <Ionicons name="scan-outline" size={24} color="white" style={styles.buttonIcon} />
+          <Text style={styles.buttonText}>Open Scanner</Text>
+        </Pressable>
+      </View>
+
       <Text style={styles.privacyText}>
         Camera access is required for scanning QR codes
       </Text>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -89,26 +116,32 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     maxWidth: '80%',
   },
+  buttonWrapper: {
+    position: 'relative',
+    alignItems: 'center',
+  },
+  shadow: {
+    position: 'absolute',
+    width: 280, // Slightly bigger than the button for better visibility
+    height: 60,
+    backgroundColor: 'rgb(0, 0, 0)', // Semi-transparent for a real shadow effect
+    borderRadius: 10,
+    top: 8, 
+  },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#4F46E5',
+    backgroundColor: '#3575E4',
+    borderColor: '#111',
+    borderWidth: 2,
+    borderRadius: 8,
     paddingVertical: 16,
     paddingHorizontal: 24,
-    borderRadius: 12,
-    width: '100%',
-    maxWidth: 280,
-    shadowColor: '#4F46E5',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    width: 280,
     elevation: 4,
   },
-  buttonPressed: {
-    backgroundColor: '#3730A3',
-    transform: [{ scale: 0.98 }],
-  },
+
   buttonIcon: {
     marginRight: 8,
   },
@@ -122,7 +155,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#9CA3AF',
     textAlign: 'center',
-  }
-})
+  },
+});
 
-export default Page
+export default Page;
