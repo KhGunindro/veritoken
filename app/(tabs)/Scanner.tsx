@@ -1,6 +1,6 @@
-import { View, Text, Pressable, StyleSheet, Image, StatusBar } from 'react-native'
-import React, { useState } from 'react'
-import { useCameraPermissions } from 'expo-camera'
+import { View, Text, Pressable, StyleSheet, StatusBar, Animated } from 'react-native';
+import React, { useState } from 'react';
+import { useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -8,14 +8,28 @@ const Page = () => {
   const [permission, requestPermission] = useCameraPermissions();
   const [isScanning, setIsScanning] = useState(false);
   const router = useRouter();
+  const [hoverAnim] = useState(new Animated.Value(8));
+
+  const handlePressIn = () => {
+    Animated.timing(hoverAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.timing(hoverAnim, {
+      toValue: 8,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  };
 
   const handlePress = async () => {
-    // Prevent multiple scan attempts
     if (isScanning) return;
-    
     setIsScanning(true);
 
-    // Check if permission is already granted
     if (permission?.granted) {
       router.push({
         pathname: '/scanner',
@@ -23,8 +37,7 @@ const Page = () => {
       });
       return;
     }
-    
-    // Request permission if not granted
+
     const permissionResponse = await requestPermission();
     if (permissionResponse.granted) {
       router.push({
@@ -32,7 +45,6 @@ const Page = () => {
         params: { singleScan: 'true' }
       });
     } else {
-      // Reset scanning state if permission denied
       setIsScanning(false);
     }
   };
@@ -40,36 +52,48 @@ const Page = () => {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-      
+
       <View style={styles.heroContainer}>
         <View style={styles.iconContainer}>
-          <Ionicons name="qr-code" size={80} color="#4F46E5" />
+          <Ionicons name="qr-code" size={80} color="#3575E4" />
         </View>
         <Text style={styles.title}>QR Scanner</Text>
         <Text style={styles.subtitle}>Scan QR to verify your token</Text>
       </View>
-      
-      <Pressable 
-        style={({pressed}) => [
-          styles.button,
-          pressed && styles.buttonPressed,
-          isScanning && styles.buttonDisabled
-        ]}
-        onPress={handlePress}
-        disabled={isScanning}
-      >
-        <Ionicons name="scan-outline" size={24} color="white" style={styles.buttonIcon} />
-        <Text style={styles.buttonText}>
-          {isScanning ? "Scanning..." : "Open Scanner"}
-        </Text>
-      </Pressable>
-      
+
+      <View style={styles.buttonWrapper}>
+        <Animated.View
+          style={[
+            styles.shadow,
+            {
+              transform: [{ translateX: hoverAnim }, { translateY: hoverAnim }],
+            },
+          ]}
+        />
+        <Pressable
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+            isScanning && styles.buttonDisabled,
+          ]}
+          onPress={handlePress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          disabled={isScanning}
+        >
+          <Ionicons name="scan-outline" size={24} color="white" style={styles.buttonIcon} />
+          <Text style={styles.buttonText}>
+            {isScanning ? "Scanning..." : "Open Scanner"}
+          </Text>
+        </Pressable>
+      </View>
+
       <Text style={styles.privacyText}>
         Camera access is required for scanning QR codes
       </Text>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -109,20 +133,29 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     maxWidth: '80%',
   },
+  buttonWrapper: {
+    position: 'relative',
+    alignItems: 'center',
+  },
+  shadow: {
+    position: 'absolute',
+    width: 280,
+    height: 60,
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    borderRadius: 10,
+    top: 8,
+  },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#4F46E5',
+    backgroundColor: '#3575E4',
+    borderColor: '#111',
+    borderWidth: 2,
+    borderRadius: 8,
     paddingVertical: 16,
     paddingHorizontal: 24,
-    borderRadius: 12,
-    width: '100%',
-    maxWidth: 280,
-    shadowColor: '#4F46E5',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
+    width: 280,
     elevation: 4,
   },
   buttonPressed: {
@@ -131,7 +164,7 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     backgroundColor: '#9CA3AF',
-    shadowOpacity: 0.1,
+    borderColor: '#9CA3AF',
   },
   buttonIcon: {
     marginRight: 8,
@@ -146,7 +179,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#9CA3AF',
     textAlign: 'center',
-  }
-})
+  },
+});
 
-export default Page
+export default Page;
