@@ -21,9 +21,6 @@ const Page = () => {
     setShowForm(true);
   };
 
-
-
-  // change the database to a Cybrella's database
   const handleGenerateQR = async () => {
     if (!companyName || !workingDays) {
       Alert.alert('Error', 'Please fill in all fields');
@@ -44,10 +41,16 @@ const Page = () => {
 
       if (existingCompanies.includes(companyName.toLowerCase())) {
         Alert.alert('Error', `${companyName} is already registered!`);
+        setIsGenerating(false);
         return;
       }
 
-      const data = `Company: ${companyName}, Working Days: ${workingDays}`;
+      // Create JSON data instead of a string
+      const data = JSON.stringify({
+        CompanyName: companyName,
+        WorkingDays: workingDays
+      });
+      
       setQrData(data);
       setShowForm(false);
 

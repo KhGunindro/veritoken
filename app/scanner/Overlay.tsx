@@ -6,7 +6,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const QRScanOverlay = ({
   scannerSize = 250,
   borderColor = '#FFF',
-  overlayColor = 'rgba(0, 0, 0, 0.7)'
+  overlayColor = 'rgba(0, 0, 0, 0.4)' // Reduced opacity from 0.7 to 0.5
 }) => {
   const animatedValue = React.useRef(new Animated.Value(0)).current;
 

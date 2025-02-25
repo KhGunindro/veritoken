@@ -1,23 +1,39 @@
 import { View, Text, Pressable, StyleSheet, Image, StatusBar } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import { useCameraPermissions } from 'expo-camera'
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 const Page = () => {
   const [permission, requestPermission] = useCameraPermissions();
+  const [isScanning, setIsScanning] = useState(false);
   const router = useRouter();
 
   const handlePress = async () => {
+    // Prevent multiple scan attempts
+    if (isScanning) return;
+    
+    setIsScanning(true);
+
     // Check if permission is already granted
     if (permission?.granted) {
-      router.push('/scanner');
+      router.push({
+        pathname: '/scanner',
+        params: { singleScan: 'true' }
+      });
       return;
     }
+    
     // Request permission if not granted
     const permissionResponse = await requestPermission();
     if (permissionResponse.granted) {
-      router.push('/scanner');
+      router.push({
+        pathname: '/scanner',
+        params: { singleScan: 'true' }
+      });
+    } else {
+      // Reset scanning state if permission denied
+      setIsScanning(false);
     }
   };
 
@@ -36,12 +52,16 @@ const Page = () => {
       <Pressable 
         style={({pressed}) => [
           styles.button,
-          pressed && styles.buttonPressed
+          pressed && styles.buttonPressed,
+          isScanning && styles.buttonDisabled
         ]}
         onPress={handlePress}
+        disabled={isScanning}
       >
         <Ionicons name="scan-outline" size={24} color="white" style={styles.buttonIcon} />
-        <Text style={styles.buttonText}>Open Scanner</Text>
+        <Text style={styles.buttonText}>
+          {isScanning ? "Scanning..." : "Open Scanner"}
+        </Text>
       </Pressable>
       
       <Text style={styles.privacyText}>
@@ -108,6 +128,10 @@ const styles = StyleSheet.create({
   buttonPressed: {
     backgroundColor: '#3730A3',
     transform: [{ scale: 0.98 }],
+  },
+  buttonDisabled: {
+    backgroundColor: '#9CA3AF',
+    shadowOpacity: 0.1,
   },
   buttonIcon: {
     marginRight: 8,
