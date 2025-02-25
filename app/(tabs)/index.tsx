@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, Alert, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, TextInput, Image, Animated } from 'react-native';
 import React, { useState, useRef } from 'react';
 import QRCode from 'react-native-qrcode-svg';
 import { captureRef } from 'react-native-view-shot';
@@ -6,7 +6,30 @@ import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
 
 const Page = () => {
+  const [qrData, setQrData] = useState<string | null>(null);
+  const [companyName, setCompanyName] = useState('');
+  const [workingDays, setWorkingDays] = useState('');
+  const [showForm, setShowForm] = useState(true);
+  const [hoverAnim] = useState(new Animated.Value(8));
 
+
+  const handlePressIn = () => {
+    Animated.timing(hoverAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.timing(hoverAnim, {
+      toValue: 8,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const handleGenerateQR = () => {
   const [qrData, setQrData] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState('');
   const [workingDays, setWorkingDays] = useState('');
@@ -96,6 +119,15 @@ const Page = () => {
   )}
         {showForm && (
           <>
+            <Image
+              source={require('../../assets/images/scanner.png')}
+              style={{ width: 300,
+                height: 200,
+                position: 'relative',
+                top: -60,
+                marginBottom: 10, 
+                 }}
+            />
             <TextInput
               placeholder="Company Name"
               value={companyName}
@@ -114,6 +146,13 @@ const Page = () => {
             </TouchableOpacity>
           </>
         )}
+        <Animated.View style={[styles.shadow, { transform: [{ translateX: hoverAnim }, { translateY: hoverAnim }] }]} />
+        <TouchableOpacity style={styles.button}  activeOpacity={30} // Mimics :active effect
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut} 
+        onPress={handleGenerateQR}>
+          <Text style={styles.buttonText}>Generate QR</Text>
+        </TouchableOpacity>
 
         {qrData && (
           <View style={styles.qrContainer}>
@@ -146,6 +185,28 @@ const Page = () => {
 };
 
 const styles = StyleSheet.create({
+  
+  shadow: {
+    position: 'relative',
+    width: 160, // Adjust as needed
+    height: 48,
+    backgroundColor: '#111', // Matches CSS shadow
+    borderRadius: 8,
+    top: -1,
+    zIndex: -1, // Places it behind the button
+  },
+  button: {
+    position:'relative',
+    top:-50,
+    width: 160,
+    height: 48,
+    backgroundColor: '#3575E4',
+    borderColor: '#111',
+    borderWidth: 2,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   container: {
     flex: 1,
     backgroundColor: '#f0f0f0',
